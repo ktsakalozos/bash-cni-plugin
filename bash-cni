@@ -5,6 +5,16 @@ if [[ ${DEBUG} -gt 0 ]]; then set -x; fi
 exec 3>&1 # make stdout available as fd 3 for the result
 exec &>> /var/log/bash-cni-plugin.log
 
+if [ -z "$CNI_COMMAND" ]
+then
+	echo "Initialising fan cni"
+	# TODO get this from an argument
+	local default_interface="$(netstat -rn | grep '^0.0.0.0' | gawk '{print $NF}' | head -1)"
+	sudo fanctl up 10.0.0.0/8 $default_interface/16
+	exit 0
+fi
+
+
 IP_STORE=/tmp/reserved_ips # all reserved ips will be stored there
 
 echo "CNI command: $CNI_COMMAND" 
